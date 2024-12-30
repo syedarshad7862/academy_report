@@ -1,0 +1,106 @@
+# from openpyxl import Workbook
+# wb = Workbook()
+
+# # grab the active worksheet
+# ws = wb.active
+
+from openpyxl import load_workbook
+from docx import Document
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from datetime import datetime
+
+# Create a new Document
+document = Document()
+
+wb = load_workbook(filename = r'C:\Users\ThinkPad\Desktop\academy report\Master Sheet - Student Performance Report.xlsx', data_only=True)
+attendance_sheet = wb['Attendance report']
+# print(sheet_ranges['D18'].value)
+print(attendance_sheet)
+rows = attendance_sheet.rows
+# print(dir(rows))
+# row1 = rows.__next__()
+# row2 = rows.__next__()
+# row3 = rows.__next__()
+# row4 = rows.__next__()
+# row5 = rows.__next__()
+# row = rows.__next__()
+# print(dir(row))
+# print(row)
+# cell_data = row[1]
+# print(dir(cell_data))
+# print(cell_data.value)
+# print("after row data")
+
+data = []
+
+for i, row in enumerate(attendance_sheet.rows, start=1):
+    if i < 6:  # Skip rows before row 6
+      continue
+      #print(f"Row {i}: {row}")
+    if row[1].value == "Session Date":
+      print(f"Report Duration: From {row[2].value} to {row[13].value}")
+      session_start_date = row[2].value
+      session_end_date = row[13].value
+      data.append(session_start_date)
+      data.append(session_end_date)
+    if row[1].value == "Student Name":
+      # print(f"{row[1].value}:{row[15].value}")
+      print(f"Total Live Session Scheduled: {row[15].value}")
+      session = row[15].value
+      data.append(session)
+    if i == 12 :
+      # Convert to percentage
+      percentage = row[16].value * 100
+      print(f"Student Name: {row[1].value}, Attended: {row[15].value}, Percentage: {percentage:.2f}%")
+      student_name = row[1].value
+      attended = row[15].value
+      data.append(student_name)
+      data.append(attended)
+      data.append(percentage)
+    if i >= 24:
+      break
+
+print(data[0:])
+title1 = document.add_paragraph('Daari Academy – Your Path to Success')
+title1.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+# add paragraphs into word file
+
+report_duration = document.add_paragraph()
+report_duration.add_run(f"Report Duration: From {data[0]} to {data[1]}")
+report_duration.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+paragraph = document.add_paragraph()
+paragraph.add_run(f"Student Name: {data[3]}").bold = True
+
+title3 = document.add_paragraph()
+title3.add_run("A. Attendance Report")
+title3.alignment = WD_ALIGN_PARAGRAPH.CENTER
+# table for attendance report
+table = document.add_table(rows= 3,cols=3)
+# add hearder
+hdr_cells = table.rows[0].cells
+headers = [
+  "Total Live Session Scheduled",
+  "Attended",
+  "Percentage"
+]
+hdr_cells[0].text = headers[0]
+hdr_cells[1].text = headers[1]
+hdr_cells[2].text = headers[2]
+
+# print(hdr_cells[0])
+# for i,header in enumerate(headers[0], start=0):
+#     hdr_cells[i].text = header
+
+# print(hdr_cells, len(hdr_cells),len(headers))
+
+# Add the data rows
+for row in data[0:]:
+    row_cells = table.add_row().cells
+    for i, cell in enumerate(row):
+        row_cells[i].text = str(cell)
+# document.add_paragraph(data[1])
+# document.add_paragraph(data[2])
+
+# document.save('test1.docx')
