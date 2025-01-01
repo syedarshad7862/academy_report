@@ -12,7 +12,48 @@ output_folder = r'C:\Users\ThinkPad\Desktop\python project\\'
 
 wb = load_workbook(filename = r'C:\Users\ThinkPad\Desktop\academy report\Master Sheet - Student Performance Report.xlsx', data_only=True)
 
-sheet_names = ["Attendance report", "Rating"]
+
+# it is for rating sheet
+rating_sheet = wb["Rating"]
+
+skip_row_of_rating = 3
+start_cell_of_rating = 2
+
+rating_sheet_data = {}
+sheet_data = []
+# rating_names = ["Attendance report"]
+for i, row in enumerate(rating_sheet.rows, start=1):
+      if i <= skip_row_of_rating:
+            continue
+      print(f"row {i} row_data {row[start_cell_of_rating].value}")
+      row_data = []
+      for j, cell in enumerate(row[start_cell_of_rating:], start=start_cell_of_rating):
+            # print(cell.value)
+            row_data.append(cell.value)
+      if row_data:
+            sheet_data.append(row_data)  
+      rating_sheet_data["Attendance report"] = sheet_data
+      if i == 6:
+            break
+         
+     
+print(f" it only attendance report{rating_sheet_data} and {len(rating_sheet_data)}")
+print(f" it only attendance report{rating_sheet_data['Attendance report']}")
+
+
+rating_criteria = rating_sheet_data["Attendance report"]
+print(f"rating_criteria {rating_criteria}")
+# function for percentage of rating
+def get_rating(p):
+    for criteria in rating_criteria:
+        _, rating, lower_bound, upper_bound, action = criteria
+        # print(rating)
+        if  lower_bound <= p <= upper_bound:
+            return rating, action
+    return "unknown", "no action"
+
+# it for looping multiples sheets
+sheet_names = ["Attendance report"]
 
 skip_rows = {
     'Attendance report': 5,  # Skip 5 rows for 'Sheet1'
@@ -54,7 +95,7 @@ for sheet_name in sheet_names:
             # sheet_data.append(row_data) 
             # print(f"Row {i} data: {[cell.value for cell in row]}")
 
-# print(f" it is dictionary len: {len(sheets_data)}it list len {len(sheet_data)}")
+print(f" it is dictionary len: {len(sheets_data)}it list len {len(sheet_data)}")
 
 # print(len(sheets_data[sheet_names[0]])) # it has 18 elements
 attendance_sheet_data = sheets_data[sheet_names[0]]
@@ -66,19 +107,26 @@ attendance_sheet_data = sheets_data[sheet_names[0]]
 #       for row in data:
 #             print(row)
 
-# Loop through each student row and generate a report
 session_dates = attendance_sheet_data[0][1:]  # Skip the header
 valid_dates = [date for date in session_dates if date is not None]
 start_date = valid_dates[0]
 end_date = valid_dates[-1]
-# print(f"data of arr : {attendance_sheet_data[5:]}")
+# calculates the sessions
+total_sessions = attendance_sheet_data[3][14]
+# print(f"data of arr : {attendance_sheet_data[3][14]}")
 # Loop through each student row and generate a report
 for student_row in attendance_sheet_data[5:]:
     print(student_row)
     student_name = student_row[0]
     attended_sessions = student_row[14]  # Attended sessions count
-    attendance_percentage = student_row[15]  # Attendance percentage
+    print(attended_sessions)
+#     attendance_percentage = student_row[15]  # Attendance percentage
+    attendance_percentage = (attended_sessions/total_sessions) * 100# Attendance percentage
+#     print(f"attended: {attended_sessions} and {attendance_percentage * 100:.2f}%")
     print(f"attended: {attended_sessions} and {attendance_percentage}")
+
+    rating, action_needed = get_rating(attendance_percentage)
+    print(rating,action_needed)
     # Create a new Document
     document = Document()
 
@@ -112,15 +160,18 @@ for student_row in attendance_sheet_data[5:]:
     hdr_cells[1].text = 'Attended'
     hdr_cells[2].text = 'Percentage'
     
+    # convert the 1 to 100%
+    percentage = f"{attendance_percentage:.2f}%"
+    print(percentage)
     # Add attendance data
     row_cells = table.add_row().cells
-    row_cells[0].text = str(len(valid_dates))  # Total scheduled sessions
+    row_cells[0].text = str(total_sessions)  # Total scheduled sessions
     row_cells[1].text = str(attended_sessions)
-    row_cells[2].text = str(attendance_percentage)
-    
+    row_cells[2].text = str(percentage)
+    print(percentage)
 #     Rating section
-#     document.add_paragraph(f"Rating: {rating}")
-#     document.add_paragraph(f"Action needed: {action_needed}")
+    document.add_paragraph(f"Rating: {rating}")
+    document.add_paragraph(f"Action needed: {action_needed}")
     
         # Save the document for the student
         
