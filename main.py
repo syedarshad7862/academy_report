@@ -269,7 +269,7 @@ for i,student_row in enumerate(attendance_sheet_data[5:], start=1):
     attendance_title.add_run("C. Mock Test Report")
     attendance_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
     
-    std_mock_test = assignment_sheet_data[i+4]
+    std_mock_test = mock_test_sheet_data[i+4]
     mock_test_attended = std_mock_test[6]
     mock_test_percentage = (mock_test_attended/mock_test_due) * 100 # mock test percentage
     print(f"row {i} student data {std_mock_test}, {mock_test_attended}, {mock_test_percentage}")
