@@ -20,32 +20,61 @@ skip_row_of_rating = 3
 start_cell_of_rating = 2
 
 rating_sheet_data = {}
-sheet_data = []
+sheet_data_attendance = []
+sheet_data_assignment = []
+sheet_data_mock = []
 # rating_names = ["Attendance report"]
 for i, row in enumerate(rating_sheet.rows, start=1):
       if i <= skip_row_of_rating:
             continue
-      print(f"row {i} row_data {row[start_cell_of_rating].value}")
+      # print(f"row {i} row_data {row[start_cell_of_rating].value}")
       row_data = []
       for j, cell in enumerate(row[start_cell_of_rating:], start=start_cell_of_rating):
             # print(cell.value)
             row_data.append(cell.value)
       if row_data:
-            sheet_data.append(row_data)  
-      rating_sheet_data["Attendance report"] = sheet_data
-      if i == 6:
-            break
+            if len(sheet_data_attendance) < 3:
+                 sheet_data_attendance.append(row_data)
+            elif len(sheet_data_assignment) < 3:
+                 sheet_data_assignment.append(row_data)
+            else:
+                 sheet_data_mock.append(row_data)           
+rating_sheet_data["attendance report"] = sheet_data_attendance
+rating_sheet_data["assignment report"] = sheet_data_assignment
+rating_sheet_data["mock report"] = sheet_data_mock
+
          
      
-print(f" it only attendance report{rating_sheet_data} and {len(rating_sheet_data)}")
-print(f" it only attendance report{rating_sheet_data['Attendance report']}")
+# print(f" it only attendance report{rating_sheet_data} and {len(rating_sheet_data)}")
+# print(f" it only attendance report{rating_sheet_data['Attendance report']}")
 
 
-rating_criteria = rating_sheet_data["Attendance report"]
-print(f"rating_criteria {rating_criteria}")
-# function for percentage of rating
+attendance_rating_criteria = rating_sheet_data["attendance report"]
+assignment_rating_criteria = rating_sheet_data["assignment report"]
+mock_test_rating_criteria = rating_sheet_data["mock report"]
+# print(f"rating_criteria {rating_criteria}")
+
+# function for percentage of attendance rating
 def get_rating(p):
-    for criteria in rating_criteria:
+    for criteria in attendance_rating_criteria:
+        _, rating, lower_bound, upper_bound, action = criteria
+        # print(rating)
+        if  lower_bound <= p <= upper_bound:
+            return rating, action
+    return "unknown", "no action"
+
+# function for percentage of assignment rating
+def get_assignment_rating(p):
+    for criteria in attendance_rating_criteria:
+        _, rating, lower_bound, upper_bound, action = criteria
+        # print(rating)
+        if  lower_bound <= p <= upper_bound:
+            return rating, action
+    return "unknown", "no action"
+
+# function for percentage of mock test rating
+def get_mock_test_rating(p):
+    for criteria in mock_test_rating_criteria:
         _, rating, lower_bound, upper_bound, action = criteria
         # print(rating)
         if  lower_bound <= p <= upper_bound:
@@ -53,16 +82,19 @@ def get_rating(p):
     return "unknown", "no action"
 
 # it for looping multiples sheets
-sheet_names = ["Attendance report"]
+sheet_names = ["Attendance report", "Assignment report", "Mock Test Report"]
 
 skip_rows = {
-    'Attendance report': 5,  # Skip 5 rows for 'Sheet1'
-    'Rating': 2   # Skip 2 rows for 'Sheet2'
+    'Attendance report': 5, 
+    'Assignment report': 6,
+    'Mock Test Report': 6
+      
 }
 
 start_cells = {
       'Attendance report': 1,
-      "Rating": 2
+      'Assignment report': 2,
+      'Mock Test Report': 1,
       }
 
 # dictionary to store row data
@@ -95,10 +127,21 @@ for sheet_name in sheet_names:
             # sheet_data.append(row_data) 
             # print(f"Row {i} data: {[cell.value for cell in row]}")
 
-print(f" it is dictionary len: {len(sheets_data)}it list len {len(sheet_data)}")
+print(f" it is dictionary len: {len(sheets_data)} it list len {len(sheet_data)}")
+# print(f" it is dictionary data : {sheets_data}")
 
 # print(len(sheets_data[sheet_names[0]])) # it has 18 elements
 attendance_sheet_data = sheets_data[sheet_names[0]]
+assignment_sheet_data = sheets_data[sheet_names[1]]
+mock_test_sheet_data = sheets_data[sheet_names[2]]
+# print(assignment_sheet_data)
+# loop for assignments
+# for i,std_assignment in enumerate(assignment_sheet_data[5:], start=1):
+#     submitted = std_assignment[6]
+#     assignment_percentage = (submitted/assignment_due) * 100 # assignment percentage
+#     print(f"row {i} student data {std_assignment}, {submitted}, {assignment_percentage}")
+#     if i == 13:
+#          break
 # print(attendance_sheet_data[2:])
 # print(attendance_sheet_data[0][1], attendance_sheet_data[0][12])
 # session_dates = attendance_sheet_data[0][1:]
@@ -113,18 +156,25 @@ start_date = valid_dates[0]
 end_date = valid_dates[-1]
 # calculates the sessions
 total_sessions = attendance_sheet_data[3][14]
+# calculates the assignemts
+assignment_due = assignment_sheet_data[3][6]
+# mock test due
+mock_test_due = mock_test_sheet_data[3][6]
 # print(f"data of arr : {attendance_sheet_data[3][14]}")
+
+# this is 
 # Loop through each student row and generate a report
-for student_row in attendance_sheet_data[5:]:
+for i,student_row in enumerate(attendance_sheet_data[5:], start=1):
     print(student_row)
     student_name = student_row[0]
     attended_sessions = student_row[14]  # Attended sessions count
     print(attended_sessions)
 #     attendance_percentage = student_row[15]  # Attendance percentage
-    attendance_percentage = (attended_sessions/total_sessions) * 100# Attendance percentage
+    attendance_percentage = (attended_sessions/total_sessions) * 100 # Attendance percentage
 #     print(f"attended: {attended_sessions} and {attendance_percentage * 100:.2f}%")
     print(f"attended: {attended_sessions} and {attendance_percentage}")
-
+     
+    # calling function for attendance rating
     rating, action_needed = get_rating(attendance_percentage)
     print(rating,action_needed)
     # Create a new Document
@@ -151,6 +201,9 @@ for student_row in attendance_sheet_data[5:]:
     paragraph = document.add_paragraph()
     paragraph.add_run(f"Student Name: {student_name}").bold = True
 
+    attendance_title = document.add_paragraph()
+    attendance_title.add_run("A. Attendance Report")
+    
     # Attendance report table
     table = document.add_table(rows=1, cols=3)
 
@@ -169,12 +222,82 @@ for student_row in attendance_sheet_data[5:]:
     row_cells[1].text = str(attended_sessions)
     row_cells[2].text = str(percentage)
     print(percentage)
-#     Rating section
+    #Rating section
     document.add_paragraph(f"Rating: {rating}")
     document.add_paragraph(f"Action needed: {action_needed}")
     
-        # Save the document for the student
-        
+      #Assignment report start here
+    attendance_title = document.add_paragraph()
+    attendance_title.add_run("B. Assignment Report")
+    attendance_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    
+#     for i,std_assignment in enumerate(assignment_sheet_data[5:], start=1):
+#     for i,std_assignment in enumerate(assignment_sheet_data[5:], start=1):
+    std_assignment = assignment_sheet_data[i+4]
+    submitted = std_assignment[6]
+    assignment_percentage = (submitted/assignment_due) * 100 # assignment percentage
+    print(f"row {i} student data {std_assignment}, {submitted}, {assignment_percentage}")
+      
+    
+        # Assignment report table
+    table = document.add_table(rows=1, cols=3)
+
+    # Add header row
+    hdr_cells = table.rows[0].cells
+    hdr_cells[0].text = 'Assignment Due'
+    hdr_cells[1].text = 'Submitted'
+    hdr_cells[2].text = 'Percentage'
+    
+    # convert the 1 to 100%
+    converted_assignment_percentage = f"{assignment_percentage:.2f}%"
+#     print(assignment_percentage)
+    # Add assignment data
+    row_cells = table.add_row().cells
+    row_cells[0].text = str(assignment_due)  # Total assignment
+    row_cells[1].text = str(submitted)
+    row_cells[2].text = str(converted_assignment_percentage)
+    
+    # calling function for assignment rating
+    assignment_rating, assignment_action_needed = get_assignment_rating(assignment_percentage)
+    print(assignment_rating,assignment_action_needed)
+    #Rating section
+    document.add_paragraph(f"Rating: {assignment_rating}")
+    document.add_paragraph(f"Action needed: {assignment_action_needed}")
+    
+    #Mock test report start here
+    attendance_title = document.add_paragraph()
+    attendance_title.add_run("C. Mock Test Report")
+    attendance_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    
+    std_mock_test = assignment_sheet_data[i+4]
+    mock_test_attended = std_mock_test[6]
+    mock_test_percentage = (mock_test_attended/mock_test_due) * 100 # mock test percentage
+    print(f"row {i} student data {std_mock_test}, {mock_test_attended}, {mock_test_percentage}")
+    
+        # Assignment report table
+    table = document.add_table(rows=1, cols=3)
+    
+        # Add header row
+    hdr_cells = table.rows[0].cells
+    hdr_cells[0].text = 'Mock Test Conducted'
+    hdr_cells[1].text = 'Mock Test Attended'
+    hdr_cells[2].text = 'Percentage'
+    
+    # convert the 1 to 100%
+    converted_moct_test_percentage = f"{mock_test_percentage:.2f}%"
+    # Add mock test data
+    row_cells = table.add_row().cells
+    row_cells[0].text = str(mock_test_due)  # Total mock test
+    row_cells[1].text = str(mock_test_attended)
+    row_cells[2].text = str(converted_moct_test_percentage)
+
+    # calling function for mock test rating
+    mock_test_rating, mock_test_action_needed = get_mock_test_rating(mock_test_percentage)
+    print(mock_test_rating,mock_test_action_needed)
+    #Rating section
+    document.add_paragraph(f"Rating: {mock_test_rating}")
+    document.add_paragraph(f"Action needed: {mock_test_action_needed}")  
+    # Save the document for the student        
     file_name = f"{student_name.replace(' ', '_')}.docx"
     output_path = f"{output_folder}{file_name}"
     document.save(output_path)
