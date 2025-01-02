@@ -1,4 +1,4 @@
- it is dictionary data : {'Attendance report': [
+sheets_data = {'Attendance report': [
 ['Session Date', '02-12-2024', '03-12-2024', '04-12-2024', '05-12-2024', '06-12-2024', '07-12-2024', '08-12-2024', '09-12-2024', '10-12-2024', '11-12-2024', '12-12-2024', '13-12-2024', None, None, None, None, None, None], 
 ['Session Number', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, None, None, None, None, None, None],
  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, 'Scheduled', None, None, None, None],
@@ -42,18 +42,107 @@ None, None],
  [None, None, None, None, None, None, None, None, None, None, 'Poor', 'Immediate'],
  [None, None, None, None, None, None, None, None, None, None, 'Poor', 'Immediate']]}
 
+def parse_assignment_report(data):
+    # Extract assignment names
+    assignments = data[1][1:6]  # Get the columns for assignment names
+    
+    # Extract student data
+    student_data = []
+    for row in data[5:]:
+        if row[0]:  # Check if the first cell (Student Name) exists
+            student = {
+                "name": row[0].strip(),
+                "assignments": row[1:6],  # Assignment submission status
+                "total_due": row[6],
+                "total_submitted": row[7],
+            }
+            student_data.append(student)
+    
+    return assignments, student_data
 
-['CMAP2-A02-A01', 'CMAP2-A02-A02', 'CMAP2-A02-A03', 'CMAP2-A02-A04', 'CMAP2-A02-A05']
-[{'name': 'JISNA JOSEPH', 'assignments': [0, 0, 0, 0, 0], 'total_due': 0, 'total_submitted': 0, 'percentage': None, 'rating': '75% - 89%', 'action_needed': 'Average'},
- {'name': 'SYEDA AFEEFA', 'assignments': [1, 1, 1, 1, 1], 'total_due': 5, 'total_submitted': 1, 'percentage': None, 'rating': 'Below 75%', 'action_needed': 'Poor'},
- {'name': 'SUDIR', 'assignments': [1, 0, 1, 1, 1], 'total_due': 4, 'total_submitted': '80.00%', 'percentage': None, 'rating': None, 'action_needed': None}, 
-{'name': 'NIKHATH FATIMA', 'assignments': [0, 1, 1, 1, 1], 'total_due': 4, 'total_submitted': '80.00%', 'percentage': None, 'rating': 'Assignment/s are to be submitted.', 'action_needed': 'Submission Rating'},
- {'name': 'SHOEBUDDIN AFZAL', 'assignments': [1, 1, 1, 1, 1], 'total_due': 5, 'total_submitted': 1, 'percentage': None, 'rating': 'CMAP2-A02-A01', 'action_needed': 'Poor'},
- {'name': 'SYED DASTAGEER PASHA', 'assignments': [0, 0, 0, 0, 0], 'total_due': 0, 'total_submitted': 0, 'percentage': None, 'rating': 'CMAP2-A02-A02', 'action_needed': 'Poor'},
- {'name': 'NEMATH', 'assignments': [1, 1, 1, 1, 1], 'total_due': 5, 'total_submitted': 1, 'percentage': None, 'rating': 'CMAP2-A02-A03', 'action_needed': 'Poor'},
- {'name': 'SHAIK AZHARUDDIN', 'assignments': [1, 0, 1, 1, 1], 'total_due': 4, 'total_submitted': '80.00%', 'percentage': None, 'rating': 'CMAP2-A02-A04', 'action_needed': 'Poor'},
- {'name': 'AFZAAL AHMED', 'assignments': [0, 1, 1, 1, 1], 'total_due': 4, 'total_submitted': '80.00%', 'percentage': None, 'rating': 'CMAP2-A02-A05', 'action_needed': 'Poor'},
- {'name': 'ARSHIYA SHABNAM', 'assignments': [1, 1, 1, 1, 1], 'total_due': 5, 'total_submitted': 1, 'percentage': None, 'rating': None, 'action_needed': None},
- {'name': 'ZAID PARKAR', 'assignments': [0, 0, 0, 0, 0], 'total_due': 0, 'total_submitted': 0, 'percentage': None, 'rating': None, 'action_needed': None},
- {'name': 'SHAHID HAJWANI', 'assignments': [1, 1, 1, 1, 1], 'total_due': 5, 'total_submitted': 1, 'percentage': None, 'rating': None, 'action_needed': 'Excellent '},
- {'name': 'MOHAMMED FARHAN ALI', 'assignments': [1, 0, 1, 1, 1], 'total_due': 4, 'total_submitted': '80.00%', 'percentage': None, 'rating': None, 'action_needed': 'Average'}]
+# assignments, student_data = parse_assignment_report(sheets_data["Assignment report"])
+
+
+
+
+def get_pending_assignments(assignments, student):
+    pending = []
+    for assignment, submitted in zip(assignments, student["assignments"]):
+        if submitted == 0:  # Check for unsubmitted (0)
+            pending.append({
+                "name": assignment,
+                # "rating": student["rating"],
+                # "action_needed": student["action_needed"],
+            })
+            
+    return pending
+
+
+
+# Parse the data
+assignments, student_data = parse_assignment_report(sheets_data['Assignment report'])
+print(assignments)
+print(student_data)
+
+# Select a student (e.g., "JISNA JOSEPH")
+search_student_name = "SYEDA AFEEFA" # student_name
+selected_student = next((s for s in student_data if s["name"] == search_student_name), None)
+
+if selected_student:
+    pending_assignments = get_pending_assignments(assignments, selected_student)
+    print(f"Pending assignments for {search_student_name}:")
+    for assignment in pending_assignments:
+        # print(f"- {assignment['name']} | Rating: {assignment['rating']} | Action: {assignment['action_needed']}")
+        print(f"- {assignment['name']}")
+        
+else:
+    print(f"No data found for student: {search_student_name}")
+
+
+
+# Example datasets
+"""  
+assignments = ["Name of the Assignment"] * 5  # Replace with actual assignment names
+student_data = {
+    'name': 'JISNA JOSEPH',
+    'assignments': [0, 0, 0, 0, 0],  # 0 indicates unsubmitted
+    'total_due': 5,
+}
+rating_data = [
+    {"rating": "Excellent", "min": 90, "max": 100, "action": "Keep up the good work", "deadline": "Within a week"},
+    {"rating": "Average", "min": 75, "max": 89, "action": "Take the assignments which were missed", "deadline": "Within the next three days"},
+    {"rating": "Poor", "min": 0, "max": 74, "action": "Talk to your mentor immediately", "deadline": "Immediate"},
+]
+
+# Function to generate the output table
+def generate_table(assignments, student, rating_data):
+    # Filter unsubmitted assignments
+    pending_assignments = [
+        {"assignment": assignment, "rating": rating_data[-1]}  # Default to "Poor"
+        for assignment, submitted in zip(assignments, student['assignments']) if not submitted
+    ]
+
+    # Match ratings (if needed for each pending assignment)
+    # For simplicity, we assume all unsubmitted assignments fall under the last rating (Poor).
+    # You can extend this logic to match scores with ratings.
+
+    # Create the table rows
+    table_data = []
+    for pending in pending_assignments:
+        table_data.append([
+            pending['assignment'],            # Assignment Name
+            pending['rating']['rating'],      # Submission Rating
+            pending['rating']['deadline'],    # Deadline
+        ])
+
+    return table_data
+
+# Generate the table for the student
+table = generate_table(assignments, student_data, rating_data)
+
+# Print the table
+print("Assignment/s are to be submitted. | Submission Rating | Deadline")
+for row in table:
+    print(f"{row[0]} | {row[1]} | {row[2]}")
+    
+"""    
