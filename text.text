@@ -57,3 +57,86 @@ None, None],
  {'name': 'ZAID PARKAR', 'assignments': [0, 0, 0, 0, 0], 'total_due': 0, 'total_submitted': 0, 'percentage': None, 'rating': None, 'action_needed': None},
  {'name': 'SHAHID HAJWANI', 'assignments': [1, 1, 1, 1, 1], 'total_due': 5, 'total_submitted': 1, 'percentage': None, 'rating': None, 'action_needed': 'Excellent '},
  {'name': 'MOHAMMED FARHAN ALI', 'assignments': [1, 0, 1, 1, 1], 'total_due': 4, 'total_submitted': '80.00%', 'percentage': None, 'rating': None, 'action_needed': 'Average'}]
+
+
+
+
+it is dictionary data : {'Attendance report': [
+['Session Date', '02-12-2024', '03-12-2024', '04-12-2024', '05-12-2024', '06-12-2024', '07-12-2024', '08-12-2024', '09-12-2024', '10-12-2024', '11-12-2024', '12-12-2024', '13-12-2024', None, None, None, None, None, None],
+ ['Session Number', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, None, None, None, None, None, None],
+ [None, None, None, None, None, None, None, None, None, None, None, None, None, None, 'Scheduled', None, None, None, None],
+ ['Student Name', 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, None, 11, None, None, None, None],
+ [None, None, None, None, None, None, None, None, None, None, None, None, None, None, 'Attended', 'Percentage', None, None, None],
+ ['JISNA JOSEPH ', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, None, 0, 0, None, None, None],
+ ['SYEDA AFEEFA', 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, None, 11, 1, None, None, None],
+ ['SUDIR', 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, None, 9, '81.82%', None, None, None],
+ ['NIKHATH FATIMA', 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, None, 10, '90.91%', None, None, None],
+ ['SHOEBUDDIN AFZAL', 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, None, 11, 1, None, None, None],
+ ['SYED DASTAGEER PASHA', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, None, 0, 0, None, None, None],
+ ['NEMATH', 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, None, 11, 1, None, None, None],
+ ['SHAIK AZHARUDDIN ', 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, None, 9, '81.82%', None, None, None],
+ ['AFZAAL AHMED', 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, None, 10, '90.91%', None, None, None],
+ ['ARSHIYA SHABNAM', 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, None, 11, 1, None, None, None],
+ ['ZAID PARKAR ', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, None, 0, 0, None, None, None],
+ ['SHAHID HAJWANI', 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, None, 11, 1, None, None, None],
+ ['MOHAMMED FARHAN ALI', 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, None, 9, 
+'81.82%', None, None, None]],
+ 'Assignment report': [
+['Assignment Date', None, None, None, None, None, None, None, None, None, None, None],
+ ['Assignment Name', 'CMAP2-A02-A01', 'CMAP2-A02-A02', 'CMAP2-A02-A03', 'CMAP2-A02-A04', 'CMAP2-A02-A05', None, None, None, None, None, None],
+ [None, None, None, None, None, None, 'Due', None, None, None, None, None],
+ ['Student Name', 1, 1, 1, 1, 1, 5, None, None, None, None, None],
+ [None, None, None, None, None, None, 'Submitted', 'Percentage', None, None, None, None],
+ ['JISNA JOSEPH ', 0, 0, 0, 0, 0, 0, 0, None, None, None, None],
+ ['SYEDA AFEEFA', 1, 1, 1, 1, 1, 5, 1, None, None, None, None],
+ ['SUDIR', 1, 0, 1, 1, 1, 4, '80.00%', None, None, None, None],
+ ['NIKHATH FATIMA', 0, 1, 1, 1, 1, 4, '80.00%', None, None, None, None],
+
+
+ ['SHOEBUDDIN AFZAL', 1, 1, 1, 1, 1, 5, 1, None, None, None, None],
+
+
+ ['SYED DASTAGEER PASHA', 0, 0, 0, 0, 0, 0, 0, None, None, None, None],
+
+
+ ['NEName', 1, 1, 1, 1, 1, 5, None, None, None, None, None, None, None, None, None, None, None, None],
+
+
+ [None, None, None, None, None, None,AL AHMED', 0, 1, 1, 1, 1, 4, '80.00%', None, None 'Attended', 'Percentage', None, None, None, None, None, None, None, None, None, None, None],
+
+ ['JISNA JOSEPH ', 0, 0, 0, 0, 0, 0, 0, Ne, None],
+
+ ['SHAHID HAJWANI', 1, 1, 1, 1, 1, 5, 1,one, None, None, None, None, None, None, None, None, None, None],
+
+ ['SYEDA AFEEFA', 'E', 'D', 'C', 'B', 'A', 5, 1, None, None, None, NoNone, None, None, None, None, None, None], [None,ne, None, None, None, None, None, None, None],
+ ['SUDIR', 'E', 0, 'A', 'C', 'A', 5, 1, None, None, None, None, None, None, None, None,  None]],
+ 'Mock Test Report': [['Mock Test Date', None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
+ ['Mock Test Name', 'CMAP2-A02-Mock Test -001', 'CMAP2-A02-Mock Test -002', 'CMAP2-A02-Mock Test -003', 'CMAP2-A02-Mock Test -004', 'CMAP2-A02-Mock Test -005', None, None, None, None, None, None, None, None, None, None, None, None, None],
+ [None, None, None, None, None, None, 'Due', None, None, None, None, None, None, None, None, None, None, None, None],
+ ['Student Name', 1, 1, 1, 1, 1, 5, None, None, None, None, None, None, None, None, None, None, None, None],
+ [None, None, None, None, None, None, 'Attended', 'Percentage', None, None, None, None, None, None, None, None, None, None, None],
+ ['JISNA JOSEPH ', 0, 0, 0, 0, 0, 0, 0, None, None, None, None, None, None, None, None, None, None, None],
+ ['SYEDA AFEEFA', 'E', 'D', 'C', 'B', 'A', 5, 1, None, None, None, None, None, None, None, None, None, None, None],
+ ['SUDIR', 'E', 0, 'A', 'C', 'A', 5, 1, None, None, None, None, None, None, None, None, None, None, None],
+ ['NIKHATH FATIMA', 0, 'B', 'B', 'A', 'A', 4, '80.00%', None, None, None, None, None, None, None, None, None, None, None], 
+['SHOEBUDDIN AFZAL', 'E', 'C', 'C', 'B', 'A', 5, 1, None, None, None, None, None, None, None, None, None, None, None],
+ ['SYED DASTAGEER PASHA', 0, 0, 0, 0, 0, 0, 0, None, None, None, None, None, None, None, None, None, None, None],
+ ['NEMATH', 'E', 'A', 'D', 'C', 'B', 5, 1, None, None, None, None, None, None, None, None, None, None, None],
+ ['SHAIK AZHARUDDIN ', 'E', 0, 'E', 'A', 'C', 4, '80.00%', None, None, None, None, None, None, None, None, None, None, None],
+ ['AFZAAL AHMED', 0, 'C', 'A', 'B', 'A', 4, '80.00%', None, None, None, None, None, None, None, None, None, None, None],
+ ['ARSHIYA SHABNAM', 'E', 'B', 'B', 'A', 'B', 5, 1, None, None, None, None, None, None, None, None, None, None, None],
+ ['ZAID PARKAR ', 0, 0, 0, 0, 0, 0, 0, None, None, None, None, None, None, None, None, None, None, None],
+ ['SHAHID HAJWANI', 'E', 'E', 'C', 'C', 'A', 5, 1, None, None, None, None, None, None, None, None, None, None, None],
+ ['MOHAMMED FARHAN ALI', 'E', 0, 'D', 'A', 'B', 4, '80.00%', None, None, None, None, None, None, None, None, None, None, None],
+ [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
+ [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
+ [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
+ [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None], [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None], [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None], [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None], [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None], [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None], [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None], [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None], [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None], [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None], [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None], [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None], [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None]]}
+
+
+[['Grade', 'Future Action', 'score'],
+ ['A', 'Re-attempt ', 10],
+ ['B', 'Learn from mistakes & \nRe-attempt asap', 8],
+ [None, None, None],
+ ['C', 'Learn from mistakes & \nRe-attempt within 3 days', 6],
+ [None, None, None], ['D', 'Revise all concepts, Learn from mistakes, & Re-attempt within a week', 4], ['E', 'Watch the relevant videos, revise all concepts, Learn from mistakes, & Re-attempt within a week.', 2], [0, 'Exam not attempted', None]]

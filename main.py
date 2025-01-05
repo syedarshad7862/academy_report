@@ -61,7 +61,7 @@ mock_test_rating_criteria = rating_sheet_data["mock report"]
 # function for percentage of attendance rating
 def get_rating(p):
     for criteria in attendance_rating_criteria:
-        _, rating, lower_bound, upper_bound, action, empty = criteria
+        _, rating, lower_bound, upper_bound, action, empty, empty2 = criteria
         # print(rating)
         if  lower_bound <= p <= upper_bound:
             return rating, action
@@ -70,7 +70,7 @@ def get_rating(p):
 # function for percentage of assignment rating
 def get_assignment_rating(p):
     for criteria in assignment_rating_criteria: #i have change here
-        _, rating, lower_bound, upper_bound, action, deadline = criteria
+        _, rating, lower_bound, upper_bound, action, deadline, empty = criteria
         # print(rating)
         if  lower_bound <= p <= upper_bound:
             return rating, action, deadline
@@ -79,19 +79,28 @@ def get_assignment_rating(p):
 # function for percentage of mock test rating
 def get_mock_test_rating(p):
     for criteria in mock_test_rating_criteria:
-        _, rating, lower_bound, upper_bound, action, deadline = criteria
+        _, rating, lower_bound, upper_bound, action, deadline, mock_test_feedback = criteria
         # print(rating)
         if  lower_bound <= p <= upper_bound:
-            return rating, action, deadline
+            return rating, action, deadline, mock_test_feedback
     return "unknown", "no action", "no deadline"
+# function for feedback of mock test
+def get_feed_back(p):
+    for criteria in mock_test_rating_criteria:
+        _, rating, lower_bound, upper_bound, action, deadline, mock_test_feedback = criteria
+        # print(rating)
+        if  lower_bound <= p <= upper_bound:
+            return mock_test_feedback
+    return "no feedback"
 
 # it for looping multiples sheets
-sheet_names = ["Attendance report", "Assignment report", "Mock Test Report"]
+sheet_names = ["Attendance report", "Assignment report", "Mock Test Report", "Mock Test Meta"]
 
 skip_rows = {
     'Attendance report': 5, 
     'Assignment report': 6,
-    'Mock Test Report': 6
+    'Mock Test Report': 6,
+    'Mock Test Meta': 3
       
 }
 
@@ -99,6 +108,7 @@ start_cells = {
       'Attendance report': 1,
       'Assignment report': 2,
       'Mock Test Report': 1,
+      'Mock Test Meta': 2
       }
 
 # dictionary to store row data
@@ -131,13 +141,18 @@ for sheet_name in sheet_names:
             # sheet_data.append(row_data) 
             # print(f"Row {i} data: {[cell.value for cell in row]}")
 
-print(f" it is dictionary len: {len(sheets_data)} it list len {len(sheet_data)}")
-# print(f" it is dictionary data : {sheets_data}")
+# print(f" it is dictionary len: {len(sheets_data)} it list len {len(sheet_data)}")
+print(f" it is dictionary data : {sheets_data}")
 
 # print(len(sheets_data[sheet_names[0]])) # it has 18 elements
 attendance_sheet_data = sheets_data[sheet_names[0]]
 assignment_sheet_data = sheets_data[sheet_names[1]]
 mock_test_sheet_data = sheets_data[sheet_names[2]]
+mock_test_meta_sheet_data = sheets_data[sheet_names[3]]
+
+# make dictionary of mock_test_meta for grades
+grade_action_mapping = {row[0] : {"action": row[1], "score": row[2]} for row in mock_test_meta_sheet_data if row[0] is not None }
+print(grade_action_mapping)
 # print(assignment_sheet_data)
 # loop for assignments
 # for i,std_assignment in enumerate(assignment_sheet_data[5:], start=1):
@@ -166,7 +181,7 @@ assignment_due = assignment_sheet_data[3][6]
 mock_test_due = mock_test_sheet_data[3][6]
 # print(f"data of arr : {attendance_sheet_data[3][14]}")
 
-            #function for mock test table start here
+            #function for assignment names table start here
 def parse_assignment_report(data):
     # Extract assignment names
     assignments = data[1][1:6]  # Get the columns for assignment names
@@ -192,6 +207,36 @@ def get_pending_assignments(assignments, student):
             pending.append({
                 "name": assignment,
                 # "rating": student["rating"],
+                # "action_needed": student["action_needed"],
+            })
+            
+    return pending
+# function for mock test grades
+def parse_mock_test_report(data):
+    # Extract assignment names
+    mock_test_names = data[1][1:6]  # Get the columns for mock test names
+    
+    # Extract student data
+    student_data = []
+    for row in data[5:]:
+        if row[0]:  # Check if the first cell (Student Name) exists
+            student = {
+                "name": row[0].strip(),
+                "mock_test_grade": row[1:6],  # mock test submission status
+                "total_due": row[6],
+                "total_submitted": row[7],
+            }
+            student_data.append(student)
+    
+    return mock_test_names, student_data
+
+def get_moct_test(mock_test_names, student):
+    pending = []
+    for mock_test, submitted in zip(mock_test_names, student["mock_test_grade"]):
+        if submitted == 0 or submitted == "A" or submitted == "B" or submitted == "C" or submitted == "D" or submitted == "E":  # Check for unsubmitted (0)
+            pending.append({
+                "name": mock_test,
+                "grade": student["mock_test_grade"],
                 # "action_needed": student["action_needed"],
             })
             
@@ -253,6 +298,7 @@ for i,student_row in enumerate(attendance_sheet_data[5:]):
 
     attendance_title = document.add_paragraph()
     attendance_title.add_run("A. Attendance Report")
+    attendance_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
     
     # Attendance report table
     table = document.add_table(rows=1, cols=3)
@@ -275,8 +321,11 @@ for i,student_row in enumerate(attendance_sheet_data[5:]):
     row_cells[2].text = str(percentage)
     print(percentage)
     #Rating section
-    document.add_paragraph(f"Rating: {rating}")
-    document.add_paragraph(f"Action needed: {action_needed}")
+    paragraph2 = document.add_paragraph(f"Rating: ")
+    paragraph2.add_run(rating).font.color.rgb = RGBColor(0, 0, 255)
+    
+    paragraph3 = document.add_paragraph(f"Action needed:")
+    paragraph3.add_run(action_needed).font.color.rgb = RGBColor(0,0,255)
     
       #Assignment report start here
     attendance_title = document.add_paragraph()
@@ -321,8 +370,8 @@ for i,student_row in enumerate(attendance_sheet_data[5:]):
                 #assignment names table start here
     # Parse the data
     assignments, student_data = parse_assignment_report(sheets_data['Assignment report'])
-    print(assignments)
-    print(student_data)
+    # print(assignments)
+    # print(student_data)
     test_data = student_data[i]
     
     # Select a student (e.g., "JISNA JOSEPH")
@@ -357,21 +406,6 @@ for i,student_row in enumerate(attendance_sheet_data[5:]):
     else:
         print(f"No data found for student: {search_student_name}")
     
-    # assignment detail table
-    # table = document.add_table(rows=5, cols=3)
-
-    # # Add header row
-    # hdr_cells = table.rows[0].cells
-    # hdr_cells[0].text = 'Assignment/s are to be submitted.'
-    # hdr_cells[1].text = 'Submission Rating'
-    # hdr_cells[2].text = 'Deadline'
-
-    # row_cells = table.add_row().cells
-    # row_cells[0].text = str(assignment_names[1])
-    # row_cells[1].text = str(assignment_names[2])
-    # row_cells[2].text = str(assignment_names[3])
-    # row_cells[3].text = str(assignment_names[4])
-    
     
     #Mock test report start here
     attendance_title = document.add_paragraph()
@@ -384,10 +418,11 @@ for i,student_row in enumerate(attendance_sheet_data[5:]):
     print(f"row {i} student data {std_mock_test}, {mock_test_attended}, {mock_test_percentage}")
     
         # mock test report table
-    table = document.add_table(rows=1, cols=3)
+    table3 = document.add_table(rows=1, cols=3)
+    table3.style = "Light Grid"
     
         # Add header row
-    hdr_cells = table.rows[0].cells
+    hdr_cells = table3.rows[0].cells
     hdr_cells[0].text = 'Mock Test Conducted'
     hdr_cells[1].text = 'Mock Test Attended'
     hdr_cells[2].text = 'Percentage'
@@ -395,17 +430,81 @@ for i,student_row in enumerate(attendance_sheet_data[5:]):
     # convert the 1 to 100%
     converted_moct_test_percentage = f"{mock_test_percentage:.2f}%"
     # Add mock test data
-    row_cells = table.add_row().cells
+    row_cells = table3.add_row().cells
     row_cells[0].text = str(mock_test_due)  # Total mock test
     row_cells[1].text = str(mock_test_attended)
     row_cells[2].text = str(converted_moct_test_percentage)
 
     # calling function for mock test rating
-    mock_test_rating, mock_test_action_needed, mock_deadline = get_mock_test_rating(mock_test_percentage)
-    print(mock_test_rating,mock_test_action_needed)
+    mock_test_rating, mock_test_action_needed, mock_deadline, mock_test_feedback = get_mock_test_rating(mock_test_percentage)
+    print(mock_test_rating,mock_test_action_needed, mock_test_feedback)
     #Rating section
     document.add_paragraph(f"Rating: {mock_test_rating}")
     document.add_paragraph(f"Action needed: {mock_test_action_needed}")  
+    
+    # mock test grade table start here
+    mock_test_names, student_of_mock_test = parse_mock_test_report(sheets_data['Mock Test Report'])
+    mock_data = student_of_mock_test[i]
+    search_student_name = student_name # student_name
+    mock_selected_student = mock_data["name"]
+    result = []
+    if mock_selected_student:
+        mock_names = get_moct_test(mock_test_names, mock_data)
+        grades = mock_data["mock_test_grade"]
+        print(f"mock test  for {search_student_name}:")
+        student_result = {"name": student_name, "grades": []}
+        for mock_test, grade in zip(mock_names, grades):
+            if grade in grade_action_mapping:
+                print(grade)
+                action_details = grade_action_mapping[grade]
+                student_result["grades"].append({
+                 "mock_test_name": mock_test,   
+                "grade": grade,
+                "action": action_details["action"],
+                "score": action_details["score"]
+            })
+            else:
+                 student_result["grades"].append({
+                "grade": grade,
+                "action": "No action available",
+                "score": None
+                })
+        result.append(student_result)     
+                 
+                  
+        # for g, mock_test in enumerate(mock_names):
+        #     # print(f"- {assignment['name']} | Rating: {assignment['rating']} | Action: {assignment['action_needed']}")
+        #     print(f"- {mock_test['name']} grade : {mock_test['grade'][g]}")
+        
+    else:
+        print(f"No data found for student: {search_student_name}")
+    total_score = 0    
+    table4 = document.add_table(rows=1, cols=3)
+    table4.style = "Light Grid"
+        # Add header row
+    hdr_cells = table4.rows[0].cells
+    hdr_cells[0].text = 'Mock Test Name'
+    hdr_cells[1].text = 'Grade'
+    hdr_cells[2].text = 'Future Action'
+    for student in result:
+        print(f"Student Name: {student['name']}")
+        for grade_detail in student["grades"]:
+            total_score += grade_detail['score']
+            # Add mock test data
+            row_cells = table4.add_row().cells
+            row_cells[0].text = str(grade_detail['mock_test_name']['name'])  # Total mock test
+            row_cells[1].text = str(grade_detail['grade'])
+            row_cells[2].text = str(grade_detail['action'])
+            print(f"mock test name: {grade_detail['mock_test_name']['name']}  Grade: {grade_detail['grade']} | Action: {grade_detail['action']} | Score: {grade_detail['score']} | total_score = {total_score}")
+        print("-" * 50) 
+    print(f"{(total_score/50)*100}")  
+    mock_percentage = (total_score/50)*100
+    Overall_Score_rating = document.add_paragraph("Overall Score rating: ")
+    Overall_Score_rating.add_run(f"Based on the Grade & assigned score (A-10, B-8, C-6, D-4, E-2) = {mock_percentage}%").font.color.rgb = RGBColor(0, 0, 255)
+    feed_back = get_feed_back(mock_percentage)
+    print(feed_back)   
+    mock_test_feedback = document.add_paragraph(f"FeedBack:")
+    mock_test_feedback.add_run(feed_back).font.color.rgb = RGBColor(0, 0, 255)
     # Save the document for the student        
     file_name = f"{student_name.replace(' ', '_')}.docx"
     output_path = f"{output_folder}{file_name}"

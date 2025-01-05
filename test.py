@@ -40,11 +40,29 @@ None, None],
  ['MOHAMMED FARHAN ALI', 1, 0, 1, 1, 1, 4, '80.00%', None, None, 'Average', 'Within the next three days'],
  [None, None, None, None, None, None, None, None, None, None, 'Poor', 'Immediate'],
  [None, None, None, None, None, None, None, None, None, None, 'Poor', 'Immediate'],
- [None, None, None, None, None, None, None, None, None, None, 'Poor', 'Immediate']]}
+ [None, None, None, None, None, None, None, None, None, None, 'Poor', 'Immediate']],
+ 'Mock Test Report': [['Mock Test Date', None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
+ ['Mock Test Name', 'CMAP2-A02-Mock Test -001', 'CMAP2-A02-Mock Test -002', 'CMAP2-A02-Mock Test -003', 'CMAP2-A02-Mock Test -004', 'CMAP2-A02-Mock Test -005', None, None, None, None, None, None, None, None, None, None, None, None, None],
+ [None, None, None, None, None, None, 'Due', None, None, None, None, None, None, None, None, None, None, None, None],
+ ['Student Name', 1, 1, 1, 1, 1, 5, None, None, None, None, None, None, None, None, None, None, None, None],
+ [None, None, None, None, None, None, 'Attended', 'Percentage', None, None, None, None, None, None, None, None, None, None, None],
+ ['JISNA JOSEPH ', 0, 0, 0, 0, 0, 0, 0, None, None, None, None, None, None, None, None, None, None, None],
+ ['SYEDA AFEEFA', 'E', 'D', 'C', 'B', 'A', 5, 1, None, None, None, None, None, None, None, None, None, None, None],
+ ['SUDIR', 'E', 0, 'A', 'C', 'A', 5, 1, None, None, None, None, None, None, None, None, None, None, None],
+ ['NIKHATH FATIMA', 0, 'B', 'B', 'A', 'A', 4, '80.00%', None, None, None, None, None, None, None, None, None, None, None], 
+['SHOEBUDDIN AFZAL', 'E', 'C', 'C', 'B', 'A', 5, 1, None, None, None, None, None, None, None, None, None, None, None],
+ ['SYED DASTAGEER PASHA', 0, 0, 0, 0, 0, 0, 0, None, None, None, None, None, None, None, None, None, None, None],
+ ['NEMATH', 'E', 'A', 'D', 'C', 'B', 5, 1, None, None, None, None, None, None, None, None, None, None, None],
+ ['SHAIK AZHARUDDIN ', 'E', 0, 'E', 'A', 'C', 4, '80.00%', None, None, None, None, None, None, None, None, None, None, None],
+ ['AFZAAL AHMED', 0, 'C', 'A', 'B', 'A', 4, '80.00%', None, None, None, None, None, None, None, None, None, None, None],
+ ['ARSHIYA SHABNAM', 'E', 'B', 'B', 'A', 'B', 5, 1, None, None, None, None, None, None, None, None, None, None, None],
+ ['ZAID PARKAR ', 0, 0, 0, 0, 0, 0, 0, None, None, None, None, None, None, None, None, None, None, None],
+ ['SHAHID HAJWANI', 'E', 'E', 'C', 'C', 'A', 5, 1, None, None, None, None, None, None, None, None, None, None, None],
+ ['MOHAMMED FARHAN ALI', 'E', 0, 'D', 'A', 'B', 4, '80.00%', None, None, None, None, None, None, None, None, None, None, None]]}
 
-def parse_assignment_report(data):
+def parse_mock_test_report(data):
     # Extract assignment names
-    assignments = data[1][1:6]  # Get the columns for assignment names
+    mock_test_names = data[1][1:6]  # Get the columns for mock test names
     
     # Extract student data
     student_data = []
@@ -52,26 +70,26 @@ def parse_assignment_report(data):
         if row[0]:  # Check if the first cell (Student Name) exists
             student = {
                 "name": row[0].strip(),
-                "assignments": row[1:6],  # Assignment submission status
+                "mock_test_grade": row[1:6],  # mock test submission status
                 "total_due": row[6],
                 "total_submitted": row[7],
             }
             student_data.append(student)
     
-    return assignments, student_data
+    return mock_test_names, student_data
 
 # assignments, student_data = parse_assignment_report(sheets_data["Assignment report"])
 
 
 
 
-def get_pending_assignments(assignments, student):
+def get_moct_test(mock_test_names, student):
     pending = []
-    for assignment, submitted in zip(assignments, student["assignments"]):
-        if submitted == 0:  # Check for unsubmitted (0)
+    for mock_test, submitted in zip(mock_test_names, student["mock_test_grade"]):
+        if submitted == 0 or submitted == "A" or submitted == "B" or submitted == "C" or submitted == "D" or submitted == "E":  # Check for unsubmitted (0)
             pending.append({
-                "name": assignment,
-                # "rating": student["rating"],
+                "name": mock_test,
+                "grade": student["mock_test_grade"],
                 # "action_needed": student["action_needed"],
             })
             
@@ -80,20 +98,20 @@ def get_pending_assignments(assignments, student):
 
 
 # Parse the data
-assignments, student_data = parse_assignment_report(sheets_data['Assignment report'])
-print(assignments)
+mock_test_names, student_data = parse_mock_test_report(sheets_data['Mock Test Report'])
+print(mock_test_names)
 print(student_data)
 
 # Select a student (e.g., "JISNA JOSEPH")
-search_student_name = "SYEDA AFEEFA" # student_name
-selected_student = next((s for s in student_data if s["name"] == search_student_name), None)
+search_student_name = 'ZAID PARKAR' # student_name
+mock_selected_student = next((s for s in student_data if s["name"] == search_student_name), None)
 
-if selected_student:
-    pending_assignments = get_pending_assignments(assignments, selected_student)
-    print(f"Pending assignments for {search_student_name}:")
-    for assignment in pending_assignments:
+if mock_selected_student:
+    mock_names = get_moct_test(mock_test_names, mock_selected_student)
+    print(f"mock test  for {search_student_name}:")
+    for g, mock_test in enumerate(mock_names):
         # print(f"- {assignment['name']} | Rating: {assignment['rating']} | Action: {assignment['action_needed']}")
-        print(f"- {assignment['name']}")
+        print(f"- {mock_test['name']} grade : {mock_test['grade'][g]}")
         
 else:
     print(f"No data found for student: {search_student_name}")
@@ -117,7 +135,7 @@ rating_data = [
 # Function to generate the output table
 def generate_table(assignments, student, rating_data):
     # Filter unsubmitted assignments
-    pending_assignments = [
+    mock_names = [
         {"assignment": assignment, "rating": rating_data[-1]}  # Default to "Poor"
         for assignment, submitted in zip(assignments, student['assignments']) if not submitted
     ]
@@ -128,7 +146,7 @@ def generate_table(assignments, student, rating_data):
 
     # Create the table rows
     table_data = []
-    for pending in pending_assignments:
+    for pending in mock_names:
         table_data.append([
             pending['assignment'],            # Assignment Name
             pending['rating']['rating'],      # Submission Rating
