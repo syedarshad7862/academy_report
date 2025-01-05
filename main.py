@@ -6,6 +6,9 @@ from docx.shared import RGBColor
 from docx.oxml import parse_xml
 from docx.oxml.ns import nsdecls
 
+# for docx to pdf
+from docx2pdf import convert
+
 # Create a new Document
 document = Document()
 
@@ -61,37 +64,46 @@ mock_test_rating_criteria = rating_sheet_data["mock report"]
 # function for percentage of attendance rating
 def get_rating(p):
     for criteria in attendance_rating_criteria:
-        _, rating, lower_bound, upper_bound, action, empty, empty2 = criteria
+        attendance_report, rating, lower_bound, upper_bound, action, empty, empty2,areas_of_improvement, final_score_basis,overall_feedback= criteria
         # print(rating)
         if  lower_bound <= p <= upper_bound:
-            return rating, action
+            return attendance_report, rating, action,areas_of_improvement, final_score_basis
     return "unknown", "no action"
 
 # function for percentage of assignment rating
 def get_assignment_rating(p):
     for criteria in assignment_rating_criteria: #i have change here
-        _, rating, lower_bound, upper_bound, action, deadline, empty = criteria
+        assignment_report, rating, lower_bound, upper_bound, action, deadline, empty, areas_of_improvement, final_score_basis, empty2 = criteria
         # print(rating)
         if  lower_bound <= p <= upper_bound:
-            return rating, action, deadline
+            return assignment_report, rating, action, deadline,areas_of_improvement,final_score_basis
     return "unknown", "no action", "no deadline"
 
 # function for percentage of mock test rating
 def get_mock_test_rating(p):
     for criteria in mock_test_rating_criteria:
-        _, rating, lower_bound, upper_bound, action, deadline, mock_test_feedback = criteria
+        mock_test_report, rating, lower_bound, upper_bound, action, deadline, mock_test_feedback, areas_of_improvement, final_score_basis, empty = criteria
         # print(rating)
         if  lower_bound <= p <= upper_bound:
-            return rating, action, deadline, mock_test_feedback
+            return mock_test_report,rating, action, deadline, mock_test_feedback,areas_of_improvement,final_score_basis
     return "unknown", "no action", "no deadline"
 # function for feedback of mock test
 def get_feed_back(p):
     for criteria in mock_test_rating_criteria:
-        _, rating, lower_bound, upper_bound, action, deadline, mock_test_feedback = criteria
+        _, rating, lower_bound, upper_bound, action, deadline, mock_test_feedback,areas_of_improvement, final_score_basis, empty = criteria
         # print(rating)
         if  lower_bound <= p <= upper_bound:
             return mock_test_feedback
     return "no feedback"
+
+# function for overall report and final socre
+def get_final_score(p):
+    for criteria in attendance_rating_criteria:
+        attendance_report, rating, lower_bound, upper_bound, action, empty, empty2,areas_of_improvement, final_score_basis, overall_feedback= criteria
+        # print(rating)
+        if  lower_bound <= p <= upper_bound:
+            return overall_feedback
+    return "unknown", "no action"
 
 # it for looping multiples sheets
 sheet_names = ["Attendance report", "Assignment report", "Mock Test Report", "Mock Test Meta"]
@@ -135,14 +147,9 @@ for sheet_name in sheet_names:
                   sheet_data.append(row_data)
                   # print(f"Row {i}: {row_data}")
             sheets_data[sheet_name] = sheet_data
-            
-            # row_data = [cell.value for cell in row[start_column:]]
-            # print("after printing row")
-            # sheet_data.append(row_data) 
-            # print(f"Row {i} data: {[cell.value for cell in row]}")
 
 # print(f" it is dictionary len: {len(sheets_data)} it list len {len(sheet_data)}")
-print(f" it is dictionary data : {sheets_data}")
+# print(f" it is dictionary data : {sheets_data}")
 
 # print(len(sheets_data[sheet_names[0]])) # it has 18 elements
 attendance_sheet_data = sheets_data[sheet_names[0]]
@@ -253,7 +260,7 @@ for i,student_row in enumerate(attendance_sheet_data[5:]):
     print(f"attended: {attended_sessions} and {attendance_percentage}")
      
     # calling function for attendance rating
-    rating, action_needed = get_rating(attendance_percentage)
+    attendance_report,rating, action_needed,areas_of_improvement, final_score_basis = get_rating(attendance_percentage)
     print(rating,action_needed)
     # Create a new Document
     document = Document()
@@ -359,7 +366,7 @@ for i,student_row in enumerate(attendance_sheet_data[5:]):
     row_cells[2].text = str(converted_assignment_percentage)
     
     # calling function for assignment rating
-    assignment_rating, assignment_action_needed, deadline = get_assignment_rating(assignment_percentage)
+    assignment_report,assignment_rating, assignment_action_needed, deadline,areas_of_improvement_in_assignment,assignment_score = get_assignment_rating(assignment_percentage)
     print(assignment_rating,assignment_action_needed)
     #Rating section
     asm_rating = document.add_paragraph(f"Rating: ")
@@ -436,11 +443,13 @@ for i,student_row in enumerate(attendance_sheet_data[5:]):
     row_cells[2].text = str(converted_moct_test_percentage)
 
     # calling function for mock test rating
-    mock_test_rating, mock_test_action_needed, mock_deadline, mock_test_feedback = get_mock_test_rating(mock_test_percentage)
+    mock_test_report,mock_test_rating, mock_test_action_needed, mock_deadline, mock_test_feedback,areas_of_improvement_in_mock,mock_test_score = get_mock_test_rating(mock_test_percentage)
     print(mock_test_rating,mock_test_action_needed, mock_test_feedback)
     #Rating section
-    document.add_paragraph(f"Rating: {mock_test_rating}")
-    document.add_paragraph(f"Action needed: {mock_test_action_needed}")  
+    mock_rating = document.add_paragraph(f"Rating: ")
+    mock_rating.add_run(f"{mock_test_rating}").font.color.rgb = RGBColor(0,0,255)
+    mock_action = document.add_paragraph(f"Action needed: ")
+    mock_action.add_run(f"{mock_test_action_needed}").font.color.rgb = RGBColor(0,0,255)  
     
     # mock test grade table start here
     mock_test_names, student_of_mock_test = parse_mock_test_report(sheets_data['Mock Test Report'])
@@ -495,19 +504,53 @@ for i,student_row in enumerate(attendance_sheet_data[5:]):
             row_cells[0].text = str(grade_detail['mock_test_name']['name'])  # Total mock test
             row_cells[1].text = str(grade_detail['grade'])
             row_cells[2].text = str(grade_detail['action'])
-            print(f"mock test name: {grade_detail['mock_test_name']['name']}  Grade: {grade_detail['grade']} | Action: {grade_detail['action']} | Score: {grade_detail['score']} | total_score = {total_score}")
+            # print(f"mock test name: {grade_detail['mock_test_name']['name']}  Grade: {grade_detail['grade']} | Action: {grade_detail['action']} | Score: {grade_detail['score']} | total_score = {total_score}")
         print("-" * 50) 
     print(f"{(total_score/50)*100}")  
     mock_percentage = (total_score/50)*100
     Overall_Score_rating = document.add_paragraph("Overall Score rating: ")
-    Overall_Score_rating.add_run(f"Based on the Grade & assigned score (A-10, B-8, C-6, D-4, E-2) = {mock_percentage}%").font.color.rgb = RGBColor(0, 0, 255)
+    Overall_Score_rating.add_run(f" Based on the Grade & assigned score (A-10, B-8, C-6, D-4, E-2) = {mock_percentage}%").font.color.rgb = RGBColor(0, 0, 255)
     feed_back = get_feed_back(mock_percentage)
     print(feed_back)   
     mock_test_feedback = document.add_paragraph(f"FeedBack:")
     mock_test_feedback.add_run(feed_back).font.color.rgb = RGBColor(0, 0, 255)
+    
+    overall_report = document.add_paragraph("Overall Report")
+    overall_report.alignment = WD_ALIGN_PARAGRAPH.CENTER
+     #Overall Report
+    table5 = document.add_table(rows=1, cols=3)
+    table5.style = "Light Grid"
+        # Add header row
+    hdr_cells = table5.rows[0].cells
+    hdr_cells[0].text = 'Title'
+    hdr_cells[1].text = 'Ratin/ Overall Grade'
+    hdr_cells[2].text = 'Area of Improvement'
+
+    row1 = table5.add_row().cells
+    row1[0].text = str(attendance_report)
+    row1[1].text = str(rating)
+    row1[2].text = str(areas_of_improvement)
+    row2 = table5.add_row().cells
+    row2[0].text = str(assignment_report)
+    row2[1].text = str(assignment_rating)
+    row2[2].text = str(areas_of_improvement_in_assignment)
+    row3 = table5.add_row().cells
+    row3[0].text = str(mock_test_report)
+    row3[1].text = str(mock_test_rating)
+    row3[2].text = str(areas_of_improvement_in_mock)
+    final_score = final_score_basis + mock_test_score + assignment_score
+    # print(final_score/30*100)
+    final_score_percentage = (final_score/30)*100
+    overall_feedback = get_final_score(final_score_percentage)
+    # print(overall_feedback)
+    final_score = document.add_paragraph("Final Score: ")
+    final_score.add_run(f"{final_score_percentage}%").font.color.rgb = RGBColor(0,0,225)
+    feedback = document.add_paragraph("Feedback: ")
+    feedback.add_run(overall_feedback).font.color.rgb = RGBColor(0,0,255)
     # Save the document for the student        
     file_name = f"{student_name.replace(' ', '_')}.docx"
     output_path = f"{output_folder}{file_name}"
     document.save(output_path)
+    # convert
     print(f"Document saved for {student_name}: {output_path}")
 
