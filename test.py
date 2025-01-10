@@ -118,6 +118,56 @@ else:
 
 
 
+assignment_range_data ={'Assignment Name': ['CMAP2-A02-A01', 'CMAP2-A02-A02', 'CMAP2-A02-A03', 'CMAP2-A02-A04', 'CMAP2-A02-A05'], 'JISNA JOSEPH ': [0, 0, 0, 0, 0], 'SYEDA AFEEFA': [1, 1, 1, 1, 1], 'SUDIR': [1, 0, 1, 1, 1], 'NIKHATH FATIMA': [0, 1, 1, 1, 1], 'SHOEBUDDIN AFZAL': [1, 1, 1, 1, 1], 'SYED DASTAGEER PASHA': [0, 0, 0, 0, 0], 'NEMATH': [1, 1, 1, 1, 1], 'SHAIK AZHARUDDIN ': [1, 0, 1, 1, 1], 'AFZAAL AHMED': [0, 1, 1, 1, 1], 'ARSHIYA SHABNAM': [1, 1, 1, 1, 1], 'ZAID PARKAR ': [0, 0, 0, 0, 0], 'SHAHID HAJWANI': [1, 1, 1, 1, 1], 'MOHAMMED FARHAN ALI': [1, 0, 1, 1, 1]}
+
+#function for assignment names table start here
+def parse_assignment_report(data):
+    
+    # Extract student data
+    student_data = []
+    for key,value in data.items():
+        if key == "Assignment Name":
+            pass
+        else:
+            student = {
+                "name": key,
+                "assignments": value, # Assignment submission status
+                # "total_due": len(submitted)
+                }
+            student_data.append(student)
+    
+    return student_data
+
+student = parse_assignment_report(assignment_range_data)
+def get_pending_assignments(assignments, student):
+    pending = []
+    for assignment, submitted in zip(assignments, student["assignments"]):
+        if submitted == 0:  # Check for unsubmitted (0)
+            pending.append({
+                "name": assignment,
+                # "rating": student["rating"],
+                # "action_needed": student["action_needed"],
+            })
+            
+    return pending
+
+def parse_mock_test_report(data):
+    # Extract assignment names
+    # mock_test_names = data[1][1:6]  # Get the columns for mock test names
+    
+    # Extract student data
+    student_data = []
+    for key,value in data.items():
+        if key == 'Mock Test Name':  # Check if the key is equal to mock test name
+            student = {
+                "name": key,
+                "mock_test_grade": value,  # mock test submission status
+                # "total_due": row[6],
+                # "total_submitted": row[7],
+            }
+            student_data.append(student)
+    
+    return student_data
 # Example datasets
 """  
 assignments = ["Name of the Assignment"] * 5  # Replace with actual assignment names
