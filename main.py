@@ -6,6 +6,9 @@ from docx.shared import RGBColor
 from docx.oxml import parse_xml
 from docx.oxml.ns import nsdecls
 
+# Correctly define the XML with namespace
+xml_with_namespace = r'<w:tblHeader {} />'.format(nsdecls('w'))
+
 # for docx to pdf
 from docx2pdf import convert
 # Output folder for saving docx files
@@ -574,6 +577,10 @@ for key,value in attendance_range_data.items():
     hdr_cells[1].text = 'Mock Test Attended'
     hdr_cells[2].text = 'Percentage'
     
+    # Set the header row to repeat on each page
+    header_row = table3.rows[0]
+    trPr = header_row._tr.get_or_add_trPr()  # Get the table row properties
+    trPr.append(parse_xml(r'<w:tblHeader {} />'.format(nsdecls('w'))))
     # convert the 0.0 to 0
     converted_moct_test_percentage = int(mock_test_percentage)
     # Add mock test data
@@ -631,6 +638,11 @@ for key,value in attendance_range_data.items():
     hdr_cells[0].text = 'Mock Test Name'
     hdr_cells[1].text = 'Grade'
     hdr_cells[2].text = 'Future Action'
+    
+    # Set the header row to repeat on each page
+    header_row = table4.rows[0]
+    trPr = header_row._tr.get_or_add_trPr()  # Get the table row properties
+    trPr.append(parse_xml(r'<w:tblHeader {} />'.format(nsdecls('w'))))
     for student in result:
         print(f"Student Name: {student['name']}")
         for grade_detail in student["grades"]:
@@ -660,9 +672,13 @@ for key,value in attendance_range_data.items():
         # Add header row
     hdr_cells = table5.rows[0].cells
     hdr_cells[0].text = 'Title'
-    hdr_cells[1].text = 'Ratin/ Overall Grade'
+    hdr_cells[1].text = 'Rating/ Overall Grade'
     hdr_cells[2].text = 'Area of Improvement'
     
+    # Set the header row to repeat on each page
+    header_row = table5.rows[0]
+    trPr = header_row._tr.get_or_add_trPr()  # Get the table row properties
+    trPr.append(parse_xml(r'<w:tblHeader {} />'.format(nsdecls('w'))))
     row1 = table5.add_row().cells
     row1[0].text = str(attendance_report)
     row1[1].text = str(rating)
