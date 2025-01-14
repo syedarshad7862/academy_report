@@ -3,3 +3,4 @@ step2 :-
 openpyxl
 python_docx
 docx2pdf
+smtplib
