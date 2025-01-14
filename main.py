@@ -5,6 +5,13 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.shared import RGBColor
 from docx.oxml import parse_xml
 from docx.oxml.ns import nsdecls
+import os
+import smtplib
+from email import encoders 
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email.mime.multipart import MIMEMultipart
+
 
 # Correctly define the XML with namespace
 xml_with_namespace = r'<w:tblHeader {} />'.format(nsdecls('w'))
@@ -12,8 +19,7 @@ xml_with_namespace = r'<w:tblHeader {} />'.format(nsdecls('w'))
 # for docx to pdf
 from docx2pdf import convert
 # Output folder for saving docx files
-output_folder = r'C:\Users\ThinkPad\Desktop\python project\\'
-
+output_folder = r'C:\Users\ThinkPad\Desktop\python project\report_gen'
 # Load the workbook
 wb = load_workbook(filename = r'C:\Users\ThinkPad\Desktop\academy report\master_sheet.xlsx', data_only=True)
 
@@ -117,7 +123,11 @@ for i, row in enumerate(report_gen.iter_rows(min_row=skip_row_of_report_gen + 1)
 # save the dates in seperate variables
 if dates:
     start_date, end_date = dates[0]
-    
+
+
+sub_folder = os.path.join(output_folder,f'from_{start_date.strftime("%d-%m-%Y")}_to_{end_date.strftime("%d-%m-%Y")}')
+if not os.path.exists(sub_folder) :
+    os.mkdir(sub_folder)  
 # Sheet names and other configuration
 # sheet_names = ["Attendance report"]
 # sheet_names = ["Attendance report", "Assignment report", "Mock Test Report", "Mock Test Meta"]
@@ -345,7 +355,41 @@ for i,row in enumerate(sheet,start=1):
         mock_test_meta_sheet_data.append(row_data)
 
 # make dictionary of mock_test_meta for grades
-grade_action_mapping = {row[0] : {"action": row[1], "score": row[2]} for row in mock_test_meta_sheet_data if row[0] is not None }           
+grade_action_mapping = {row[0] : {"action": row[1], "score": row[2]} for row in mock_test_meta_sheet_data if row[0] is not None }  
+
+# student master Data
+sheet = wb['Student Master Data']
+student_master_data = {}
+student_emails = []
+for row in sheet:
+    is_report_name = False
+    is_report_duration = False
+    is_student_email = False
+    row_data = []
+    name_row = []
+    for col in row:
+        # row_data.append(col.value)
+        # row_data.append(col.value)
+        if col.value == 'Report Name':
+            is_report_name = True
+        elif col.value is None:
+            pass
+        elif col.value == 'Report Duration':
+            is_report_duration = True
+        elif col.value is None:
+            pass
+        else:
+            is_student_email = True
+        if is_student_email:
+            # name_row.append([data for data in row_data if data is not None])
+            # student_master_data[name_row[0][0]] = name_row[0][1:]
+            row_data.append(col.value)
+    if row_data:
+    #     # student_master_data.append([data for data in row_data if data is not None])
+        student_emails.append(row_data)  
+print(student_master_data)
+master_data = student_emails[3:]
+receiver_emails = [row[2] for row in master_data]       
 #function for assignment names table start here
 def parse_assignment_report(data):
     
@@ -405,6 +449,8 @@ def get_moct_test(mock_test_names, student):
             })
             
     return pending
+sender = 'sa0675878@gmail.com'
+password = 'oxcs borx vjwm eioy'
 s = 0
 # Loop through each student row and generate a report
 for key,value in attendance_range_data.items():
@@ -700,11 +746,51 @@ for key,value in attendance_range_data.items():
     final_score.add_run(f"{int(final_score_percentage)}%").font.color.rgb = RGBColor(0,0,225)
     feedback = document.add_paragraph("Feedback: ")
     feedback.add_run(overall_feedback).font.color.rgb = RGBColor(0,0,255)
-    file_name = f"{student_name.replace(' ', '_')}.docx"
-    output_path = f"{output_folder}{file_name}"
+    file_name = f"{student_name.replace(' ', '_')}from_{start_date.strftime('%d-%m-%Y')}_to_{end_date.strftime('%d-%m-%Y')}.docx"
+    output_path = os.path.join(sub_folder,f"{student_name.replace(' ', '_')}from_{start_date.strftime('%d-%m-%Y')}_to_{end_date.strftime('%d-%m-%Y')}.docx")
+    reciever = receiver_emails[s]
     s = s + 1
     document.save(output_path)
+    pdf_file_path = os.path.splitext(output_path)[0] + ".pdf"  # Replace .docx with .pdf
     # convert
     convert(output_path)
-    print(f"Document saved for {student_name}: {output_path}")
+    
+    print(f"Document saved for {student_name}: {output_path}, {pdf_file_path}")
+    msg = MIMEMultipart()
+    msg['Subject'] = "Daari Exam result"
+
+    body = "Please find attached your exam results"
+    
+    # attach the body with the msg instance 
+    msg.attach(MIMEText(body, 'plain')) 
+    
+    # open the file to be sent  
+    attachment = open(pdf_file_path, "rb") 
+    
+    # instance of MIMEBase and named as p 
+    p = MIMEBase('application', 'octet-stream') 
+    
+    # To change the payload into encoded form 
+    p.set_payload((attachment).read())
+    
+    # encode into base64 
+    encoders.encode_base64(p) 
+   
+    # p.add_header('Content-Disposition', "attachment; filename= %s" % file_name) 
+    p.add_header('Content-Disposition', f'attachment; filename={os.path.basename(pdf_file_path)}')
+    # attach the instance 'p' to instance 'msg' 
+    msg.attach(p) 
+
+    #msg.attach(MIMEText(message, 'plain'))
+    try:
+        smtpObj = smtplib.SMTP('smtp.gmail.com:587')
+        smtpObj.starttls()
+        smtpObj.login(sender, password)
+        #pdb.set_trace()
+        smtpObj.sendmail(sender, 'mumin.mohammed@gmail.com', msg.as_string())         
+        print("Successfully sent email to " + 'mumin.mohammed@gmail.com')
+    except Exception as e:
+        print(str(e))
+        print("Error: unable to send email to " + 'mumin.mohammed@gmail.com')
+    
         
